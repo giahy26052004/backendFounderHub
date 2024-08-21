@@ -22,7 +22,6 @@ const TaskSchema = new mongoose.Schema({
     enum: ["Low", "Medium", "High"],
     default: "Medium",
   },
-
   due_date: {
     type: Date,
   },
@@ -35,5 +34,19 @@ const TaskSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Middleware to update the 'updated_at' field before saving
+TaskSchema.pre("save", function (next) {
+  this.updated_at = Date.now();
+  next();
+});
+
+// Middleware to update 'updated_at' field before updating
+TaskSchema.pre("findOneAndUpdate", function (next) {
+  this.set({ updated_at: Date.now() });
+  next();
+});
+
 const Task = mongoose.model("Task", TaskSchema);
+
 export default Task;
