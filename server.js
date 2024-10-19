@@ -8,32 +8,42 @@ import { v2 as cloudinary } from "cloudinary";
 import http from "http";
 import cors from "cors";
 import path from "path";
+
 dotenv.config();
-connectDB();
+
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-//middleware
-app.use(express.json({ limit: "50mb" })); //to parser json data in the req.body
-app.use(express.urlencoded({ extended: true })); // to parser form data in the req.body
+
+
+
+// Middleware
+app.use(express.json({ limit: "50mb" })); // To parse JSON data in req.body
+app.use(express.urlencoded({ extended: true })); // To parse form data in req.body
 app.use(cookieParser());
 app.use(cors());
-//routes
+
+// Routes
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
-///http://localhost:5000 backend,frontend
+
+// Thêm route Webhook
+app.post("/webhook", (req, res) => {
+  const event = req.body; // Nhận dữ liệu từ Webhook
+  console.log("Webhook event received:", event); // Xử lý dữ liệu
+  // Thực hiện các hành động cần thiết dựa trên sự kiện
+  res.status(200).send("Webhook received"); // Gửi phản hồi
+});
+
+// Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "frontend/dist")));
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
   });
 }
+
 server.listen(PORT, () =>
-  console.log(`listening on port localhost:${PORT} hey`)
+  console.log(`Listening on port localhost:${PORT} hey`)
 );
